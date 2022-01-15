@@ -5,8 +5,11 @@ class SharpeRatioScreener extends Screener {
     super();
   }
 
-  async screen(minRank=1, maxRank=100, minSharpeRatio=20) {
+  async screen(minRank=1, maxRank=200, minSharpeRatio=20, minPriceChange=0.01) {
     await super.screen(minRank, maxRank);
+
+    this.coins = this.coins.filter(coin => coin.price_change_percentage_24h >= minPriceChange);
+
     await this.loadHistoricalData(1);
     await this.loadSharpeRatios();
 

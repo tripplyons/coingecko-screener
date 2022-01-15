@@ -17,6 +17,15 @@ async function apiCall(path, params=[]) {
   return json;
 }
 
+async function apiCallSafe(path, params=[]) {
+  try {
+    return await apiCall(path, params);
+  } catch(e) {
+    console.log(`Error calling ${path}, retrying...`);
+    return await apiCallSafe(path, params);
+  }
+}
+
 class Screener {
   constructor() {
     this.coins = [];
@@ -27,7 +36,7 @@ class Screener {
     let startPage = Math.floor(minRank / 100) + 1;
     let endPage = Math.ceil(maxRank / 100);
     for(let page = startPage; page <= endPage; page++) {
-      let addedCoins = await apiCall('coins/markets', {
+      let addedCoins = await apiCallSafe('coins/markets', {
         vs_currency: 'usd',
         page: page
       });
@@ -48,7 +57,7 @@ class Screener {
 
   async loadHistoricalData(days=1, baseCurrency='usd') {
     for(let i in this.coins) {
-      this.coins[i].historicalData = await apiCall(`coins/${this.coins[i].id}/market_chart`, {
+      this.coins[i].historicalData = await apiCallSafe(`coins/${this.coins[i].id}/market_chart`, {
         id: this.coins[i].id,
         vs_currency: baseCurrency,
         days: days
